@@ -7,13 +7,20 @@ import java.util.HashMap;
 public class Graph<E extends Comparable> implements Serializable {
 
     private HashMap<E, HashMap<E, Integer>> adjacencyList;
-    private Orient oriented = Orient.notOriented;
-    private Balance balanced = Balance.weighted;
+    private  Orient oriented = Orient.notOriented;
+    private  Balance balanced = Balance.weighted;
 
     Graph() {
         adjacencyList = new HashMap<E, HashMap<E, Integer>>();
+        oriented = Orient.notOriented;
+        balanced = Balance.weighted;
     }
-
+    Graph(Orient orient, Balance balance)
+    {
+        adjacencyList = new HashMap<E, HashMap<E, Integer>>();
+        oriented = orient;
+        balanced = balance;
+    }
     Graph(@NotNull File file) {
         deserialize(file);
     }
@@ -21,10 +28,11 @@ public class Graph<E extends Comparable> implements Serializable {
     Graph(@NotNull Graph<E> graph) {
         adjacencyList = graph.getCopyAdjacencyList();
         oriented = graph.getOriented();
+        balanced = graph.getBalanced();
     }
 
     Graph(HashMap<E, HashMap<E, Integer>> copy) {
-        adjacencyList = copy;
+        adjacencyList = (HashMap<E, HashMap<E, Integer>>) copy.clone();
     }
 
     Graph(HashMap<E, HashMap<E, Integer>> copy, Orient orient) {
@@ -44,16 +52,8 @@ public class Graph<E extends Comparable> implements Serializable {
         return oriented;
     }
 
-    public void setOriented(Orient orient) {
-        oriented = orient;
-    }
-
     public Balance getBalanced() {
         return balanced;
-    }
-
-    public void setBalanced(Balance balance) {
-        this.balanced = balance;
     }
 
     public void addVertex(E vertex) throws Exception {
@@ -64,7 +64,12 @@ public class Graph<E extends Comparable> implements Serializable {
         }
     }
 
-    public void addRib(E firstVertex, E secondVertex, Integer length) {
+    public void addRib(E firstVertex, E secondVertex, Integer length) throws Exception {
+        if (adjacencyList.containsKey(firstVertex))
+        {
+            if (adjacencyList.get(firstVertex).containsKey(secondVertex))
+                throw new Exception("The edge already exists. It has been updated");
+        }
         if (!adjacencyList.containsKey(firstVertex)) {
             adjacencyList.put(firstVertex, new HashMap<E, Integer>());
         }
@@ -78,22 +83,15 @@ public class Graph<E extends Comparable> implements Serializable {
 
     }
 
-    public void addRib(E firstVertex, E secondVertex) {
-        if (!adjacencyList.containsKey(firstVertex)) {
-            adjacencyList.put(firstVertex, new HashMap<E, Integer>());
-        }
-        if (!adjacencyList.containsKey(secondVertex)) {
-            adjacencyList.put(secondVertex, new HashMap<E, Integer>());
-        }
-        adjacencyList.get(firstVertex).put(secondVertex, 0);
-        if (!oriented.getOrient()) {
-            adjacencyList.get(secondVertex).put(firstVertex, 0);
-        }
+    public void addRib(E firstVertex, E secondVertex) throws Exception {
+        addRib(firstVertex,secondVertex,0);
 
     }
 
-    public void deleteVertex(E vertex) {
+    public void deleteVertex(E vertex) throws Exception {
         //Samara == vertex
+        if (!adjacencyList.containsKey(vertex))
+            throw new Exception("Vertex does not exist");
         for (E firstKey : adjacencyList.keySet()) {
             if (adjacencyList.get(firstKey).containsKey(vertex)) {
                 adjacencyList.get(firstKey).remove(vertex);
@@ -104,10 +102,14 @@ public class Graph<E extends Comparable> implements Serializable {
         }
     }
 
-    public void deleteRib(E firstVertex, E secondVertex) {
+    public void deleteRib(E firstVertex, E secondVertex) throws Exception {
         if (adjacencyList.containsKey(firstVertex)) {
             if (adjacencyList.get(firstVertex).containsKey(secondVertex)) {
                 adjacencyList.get(firstVertex).remove(secondVertex);
+            }
+            else
+            {
+                throw new Exception("Rib does not exist");
             }
         }
         if (oriented == Orient.notOriented) {
@@ -129,7 +131,7 @@ public class Graph<E extends Comparable> implements Serializable {
 
     public void deserialize(File file) {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
-            Graph p = (Graph) ois.readObject();
+            Graph p = (Graph)ois.readObject();
             this.adjacencyList = p.getAdjacencyList();
             this.oriented = p.getOriented();
         } catch (IOException ex) {
@@ -140,6 +142,27 @@ public class Graph<E extends Comparable> implements Serializable {
         }
     }
 
+    @Override
+    public String toString(){
+        StringBuilder stringBuilder = new StringBuilder();
 
+        for (E firstKey : adjacencyList.keySet())
+        {
+            StringBuilder stringBuilder1 = new StringBuilder();
+            stringBuilder1.append(firstKey.toString() + " --- ");
+
+            for (E secondKey : adjacencyList.get(firstKey).keySet())
+            {
+                stringBuilder1.append(secondKey.toString());
+                if (balanced == Balance.weighted) {
+                    stringBuilder1.append("("+adjacencyList.get(firstKey).get(secondKey).toString() + ")");
+                }
+                stringBuilder1.append(", ");
+            }
+            stringBuilder.append(stringBuilder1.toString() + '\n');
+        }
+
+        return stringBuilder.toString();
+    }
 }
 

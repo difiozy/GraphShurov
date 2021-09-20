@@ -6,10 +6,8 @@ import java.util.Scanner;
 public class ConsoleUI {
 
     static void consoleWrite(Graph graph) {
-        HashMap<String, HashMap<String, Integer>> list = graph.getAdjacencyList();
-        String format = list.toString();
-        format = format.replace("}, ","}\n");
-        System.out.println(format);
+        System.out.println("{\n"+graph.toString() + "}");
+
     }
 
     static void addRib(Graph graph) {
@@ -21,9 +19,17 @@ public class ConsoleUI {
         if (graph.getBalanced().getBalance()) {
             System.out.println("Input weight or length: ");
             Integer length = scanner.nextInt();
-            graph.addRib(firstVertex, secondVertex, length);
+            try {
+                graph.addRib(firstVertex, secondVertex, length);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
         } else {
-            graph.addRib(firstVertex, secondVertex);
+            try {
+                graph.addRib(firstVertex, secondVertex);
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
 
@@ -45,51 +51,42 @@ public class ConsoleUI {
         System.out.println("Input second name vertex: ");
         String secondVertex = scanner.nextLine();
 
-        graph.deleteRib(firstVertex, secondVertex);
+        try {
+            graph.deleteRib(firstVertex, secondVertex);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     static void deleteVertex(Graph graph) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Input vertex name: ");
         String vertex = scanner.nextLine();
-        graph.deleteVertex(vertex);
-
-    }
-
-    static void setOrient(Graph graph) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Input number: 1 - Orient\n2 - Not orient");
-        int number = scanner.nextInt();
-        if (number == 1) {
-            graph.setOriented(Orient.oriented);
-        } else if (number == 2) {
-            graph.setOriented(Orient.notOriented);
-        } else {
-            System.out.println("Incorrect input");
+        try {
+            graph.deleteVertex(vertex);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
+
     }
 
-    static void setBalance(Graph graph) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Input number: 1 - Weighted\n2 - Not weighted");
-        int number = scanner.nextInt();
-        if (number == 1) {
-            graph.setBalanced(Balance.weighted);
-        } else if (number == 2) {
-            graph.setBalanced(Balance.notWeighted);
-        } else {
-            System.out.println("Incorrect input");
-        }
-    }
+
 
     static void startTesting() {
-        Graph<String> graph = new Graph<>();
         Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Input: 1 - weighted\n2 - Unweighted");
+        int num = scanner.nextInt();
+
+        System.out.println("Input: 1 - Oriented\n 2 - Not oriented");
+        int num2 = scanner.nextInt();
+        Graph<String> graph = new Graph<>((num2==1)? Orient.oriented : Orient.notOriented,
+                (num == 1)? Balance.weighted:Balance.notWeighted);
         int commandNumber;
         while (true) {
 
             System.out.println("Command: 1 - Show current graph\n2 - Add rib\n3 - Add vertex\n4 - Delete rib\n" +
-                    "5 - Delete vertex\n6 - Set balance factor\n7 - Set orient factor\n0 - End testing");
+                    "5 - Delete vertex\n0 - End testing");
             System.out.println("Input command number: ");
 
             commandNumber = scanner.nextInt();
@@ -110,12 +107,6 @@ public class ConsoleUI {
                 case (5):
                     deleteVertex(graph);
                     break;
-                case (6):
-                    setBalance(graph);
-                    break;
-                case (7):
-                    setOrient(graph);
-                    break;
                 case (0):
                     return;
             }
@@ -124,9 +115,7 @@ public class ConsoleUI {
     }
 
     static void createFileNotOrientNotBalance() {
-        Graph<String> graph = new Graph<>();
-        graph.setBalanced(Balance.notWeighted);
-        graph.setOriented(Orient.notOriented);
+        Graph<String> graph = new Graph<>(Orient.notOriented,Balance.notWeighted);
 
         try {
             graph.addVertex("Norilsk"); // isolated
@@ -147,9 +136,8 @@ public class ConsoleUI {
     }
 
     static void createFileOrientNotBalance() {
-        Graph<String> graph = new Graph<>();
-        graph.setBalanced(Balance.notWeighted);
-        graph.setOriented(Orient.oriented);
+        Graph<String> graph = new Graph<>(Orient.oriented, Balance.notWeighted);
+
 
         try {
             graph.addVertex("Norilsk"); // isolated
@@ -170,9 +158,8 @@ public class ConsoleUI {
     }
 
     static void createFileNotOrientBalance() {
-        Graph<String> graph = new Graph<>();
-        graph.setBalanced(Balance.weighted);
-        graph.setOriented(Orient.notOriented);
+        Graph<String> graph = new Graph<>(Orient.notOriented, Balance.weighted);
+
 
         try {
             graph.addVertex("Norilsk"); // isolated
@@ -193,9 +180,7 @@ public class ConsoleUI {
     }
 
     static void createFileOrientBalance() {
-        Graph<String> graph = new Graph<>();
-        graph.setBalanced(Balance.weighted);
-        graph.setOriented(Orient.oriented);
+        Graph<String> graph = new Graph<>(Orient.oriented, Balance.weighted);
 
         try {
             graph.addVertex("Norilsk"); // isolated
@@ -221,6 +206,8 @@ public class ConsoleUI {
         createFileOrientNotBalance();
         createFileNotOrientBalance();
         createFileOrientBalance();
+
+        startTesting();
 
 
     }
