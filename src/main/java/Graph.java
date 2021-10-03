@@ -60,7 +60,7 @@ public class Graph<E extends Comparable> implements Serializable {
         if (!adjacencyList.containsKey(vertex)) {
             adjacencyList.put(vertex, new HashMap<E, Integer>());
         } else {
-            throw new Exception("This vertex already have");
+                throw new Exception("This vertex already have");
         }
     }
 
@@ -84,7 +84,7 @@ public class Graph<E extends Comparable> implements Serializable {
     }
 
     public void addRib(E firstVertex, E secondVertex) throws Exception {
-        addRib(firstVertex,secondVertex,0);
+        addRib(firstVertex,secondVertex, 0);
 
     }
 
@@ -112,6 +112,10 @@ public class Graph<E extends Comparable> implements Serializable {
                 throw new Exception("Rib does not exist");
             }
         }
+        else
+        {
+            throw new Exception("Vertex is not exist");
+        }
         if (oriented == Orient.notOriented) {
             if (adjacencyList.containsKey(secondVertex)
                     && adjacencyList.get(secondVertex).containsKey(firstVertex)) {
@@ -124,7 +128,6 @@ public class Graph<E extends Comparable> implements Serializable {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
             oos.writeObject(this);
         } catch (Exception ex) {
-
             System.out.println(ex.getMessage());
         }
     }
@@ -134,6 +137,7 @@ public class Graph<E extends Comparable> implements Serializable {
             Graph p = (Graph)ois.readObject();
             this.adjacencyList = p.getAdjacencyList();
             this.oriented = p.getOriented();
+            this.balanced = p.getBalanced();
         } catch (IOException ex) {
             this.adjacencyList = new HashMap<E, HashMap<E, Integer>>();
             System.out.println("IOException, was created  empty adjacencyList");

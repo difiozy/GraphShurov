@@ -1,6 +1,7 @@
 public enum Orient {
     oriented(true),
     notOriented(false);
+
     private boolean value;
 
     Orient(Boolean value) {

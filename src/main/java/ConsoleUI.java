@@ -1,12 +1,13 @@
 import java.io.File;
 import java.sql.SQLOutput;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class ConsoleUI {
 
     static void consoleWrite(Graph graph) {
-        System.out.println("{\n"+graph.toString() + "}");
+        System.out.println("{\n" + graph.toString() + "}");
 
     }
 
@@ -71,22 +72,38 @@ public class ConsoleUI {
     }
 
 
-
     static void startTesting() {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Input: 1 - weighted\n2 - Unweighted");
-        int num = scanner.nextInt();
 
-        System.out.println("Input: 1 - Oriented\n 2 - Not oriented");
-        int num2 = scanner.nextInt();
-        Graph<String> graph = new Graph<>((num2==1)? Orient.oriented : Orient.notOriented,
-                (num == 1)? Balance.weighted:Balance.notWeighted);
+        Graph<String> graph;
         int commandNumber;
+
+        while (true) {
+            System.out.println("Load From file?(Y/N)");
+            String command = scanner.nextLine();
+
+            if (command.equals("y") || command.equals("Y")) {
+                graph = loadFromFile();
+                break;
+            } else if (command.equals("n") || command.equals("N")) {
+                System.out.println("Input: 1 - weighted\n2 - Unweighted");
+                int num = scanner.nextInt();
+
+                System.out.println("Input: 1 - Oriented\n 2 - Not oriented");
+                int num2 = scanner.nextInt();
+                graph = new Graph<>((num2 == 1) ? Orient.oriented : Orient.notOriented,
+                        (num == 1) ? Balance.weighted : Balance.notWeighted);
+
+                break;
+            } else {
+                System.out.println("Try one more time\n");
+            }
+        }
         while (true) {
 
             System.out.println("Command: 1 - Show current graph\n2 - Add rib\n3 - Add vertex\n4 - Delete rib\n" +
-                    "5 - Delete vertex\n0 - End testing");
+                    "5 - Delete vertex\n6 - Save as file\n0 - End testing");
             System.out.println("Input command number: ");
 
             commandNumber = scanner.nextInt();
@@ -107,6 +124,9 @@ public class ConsoleUI {
                 case (5):
                     deleteVertex(graph);
                     break;
+                case (6):
+                    saveAsFile(graph);
+                    break;
                 case (0):
                     return;
             }
@@ -115,7 +135,7 @@ public class ConsoleUI {
     }
 
     static void createFileNotOrientNotBalance() {
-        Graph<String> graph = new Graph<>(Orient.notOriented,Balance.notWeighted);
+        Graph<String> graph = new Graph<>(Orient.notOriented, Balance.notWeighted);
 
         try {
             graph.addVertex("Norilsk"); // isolated
@@ -199,6 +219,19 @@ public class ConsoleUI {
             e.printStackTrace();
         }
 
+    }
+
+    static void saveAsFile(Graph graph) {
+        try {
+            graph.serialize(new File("src/main/resources/Temp.bet"));
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+    }
+
+    static Graph<String> loadFromFile() {
+        return new Graph<>(new File("src/main/resources/Temp.bet"));
     }
 
     public static void main(String[] args) {
