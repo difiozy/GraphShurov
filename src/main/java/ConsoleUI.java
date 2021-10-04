@@ -1,3 +1,5 @@
+import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
+
 import java.io.File;
 import java.sql.SQLOutput;
 import java.util.HashMap;
@@ -23,13 +25,13 @@ public class ConsoleUI {
             try {
                 graph.addRib(firstVertex, secondVertex, length);
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                e.printStackTrace();
             }
         } else {
             try {
                 graph.addRib(firstVertex, secondVertex);
             } catch (Exception e) {
-                System.out.println(e.getMessage());
+                e.printStackTrace();
             }
         }
     }
@@ -41,7 +43,7 @@ public class ConsoleUI {
         try {
             graph.addVertex(vertex);
         } catch (Exception e) {
-            e.getMessage();
+            e.printStackTrace();
         }
     }
 
@@ -55,7 +57,7 @@ public class ConsoleUI {
         try {
             graph.deleteRib(firstVertex, secondVertex);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -66,7 +68,7 @@ public class ConsoleUI {
         try {
             graph.deleteVertex(vertex);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            e.printStackTrace();
         }
 
     }
@@ -102,7 +104,7 @@ public class ConsoleUI {
         }
         while (true) {
 
-            System.out.println("Command: 1 - Show current graph\n2 - Add rib\n3 - Add vertex\n4 - Delete rib\n" +
+            System.out.println("Command: 1 - Show current graph\n2 - Add Edge\n3 - Add vertex\n4 - Delete Edge\n" +
                     "5 - Delete vertex\n6 - Save as file\n0 - End testing");
             System.out.println("Input command number: ");
 
@@ -137,22 +139,56 @@ public class ConsoleUI {
     static void createFileNotOrientNotBalance() {
         Graph<String> graph = new Graph<>(Orient.notOriented, Balance.notWeighted);
 
+
         try {
             graph.addVertex("Norilsk"); // isolated
-            graph.addRib("Moscow", "Moscow"); // loop
-
-            graph.addRib("Moscow", "Saratov");
-            graph.addRib("Saratov", "Samara");
-            graph.addRib("Saratov", "Sochi");
-            graph.addRib("Krasnodar", "Saratov");
-            graph.addRib("Samara", "Krasnodar");
-            graph.addRib("Samara", "Krasnoyarsk");
-            graph.addRib("Krasnoyarsk", "Novosibirsk");
-            consoleWrite(graph);
-            graph.serialize(new File("src/main/resources/NotBalanceNotOrient.bet"));
         } catch (Exception e) {
             e.printStackTrace();
         }
+        try {
+            graph.addRib("Moscow", "Moscow"); // loop
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            graph.addRib("Moscow", "Saratov");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Saratov", "Samara");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Saratov", "Sochi");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Krasnodar", "Saratov");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Samara", "Krasnodar");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Samara", "Krasnoyarsk");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Krasnoyarsk", "Novosibirsk");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        consoleWrite(graph);
+        graph.serialize(new File("src/main/resources/NotBalanceNotOrient.bet"));
     }
 
     static void createFileOrientNotBalance() {
@@ -161,20 +197,55 @@ public class ConsoleUI {
 
         try {
             graph.addVertex("Norilsk"); // isolated
-            graph.addRib("Moscow", "Moscow"); // loop
-
-            graph.addRib("Moscow", "Saratov");
-            graph.addRib("Saratov", "Samara");
-            graph.addRib("Saratov", "Sochi");
-            graph.addRib("Krasnodar", "Saratov");
-            graph.addRib("Samara", "Krasnodar");
-            graph.addRib("Samara", "Krasnoyarsk");
-            graph.addRib("Krasnoyarsk", "Novosibirsk");
-            consoleWrite(graph);
-            graph.serialize(new File("src/main/resources/NotBalanceOrient.bet"));
         } catch (Exception e) {
             e.printStackTrace();
         }
+        try {
+            graph.addRib("Moscow", "Moscow"); // loop
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            graph.addRib("Moscow", "Saratov");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Saratov", "Samara");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Saratov", "Sochi");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Krasnodar", "Saratov");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Samara", "Krasnodar");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Samara", "Krasnoyarsk");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Krasnoyarsk", "Novosibirsk");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        consoleWrite(graph);
+        graph.serialize(new File("src/main/resources/NotBalanceOrient.bet"));
+
     }
 
     static void createFileNotOrientBalance() {
@@ -183,20 +254,55 @@ public class ConsoleUI {
 
         try {
             graph.addVertex("Norilsk"); // isolated
-            graph.addRib("Moscow", "Moscow", 10); // loop
-
-            graph.addRib("Moscow", "Saratov", 100);
-            graph.addRib("Saratov", "Samara", 20);
-            graph.addRib("Saratov", "Sochi", 25);
-            graph.addRib("Krasnodar", "Saratov", 56);
-            graph.addRib("Samara", "Krasnodar", 89);
-            graph.addRib("Samara", "Krasnoyarsk", -20);
-            graph.addRib("Krasnoyarsk", "Novosibirsk", 76);
-            consoleWrite(graph);
-            graph.serialize(new File("src/main/resources/BalanceNotOrient.bet"));
         } catch (Exception e) {
             e.printStackTrace();
         }
+        try {
+            graph.addRib("Moscow", "Moscow", 10); // loop
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            graph.addRib("Moscow", "Saratov", 100);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Saratov", "Samara", 20);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Saratov", "Sochi", 25);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Krasnodar", "Saratov", 56);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Samara", "Krasnodar", 89);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Samara", "Krasnoyarsk", -20);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Krasnoyarsk", "Novosibirsk", 76);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        consoleWrite(graph);
+        graph.serialize(new File("src/main/resources/BalanceNotOrient.bet"));
+
     }
 
     static void createFileOrientBalance() {
@@ -204,20 +310,54 @@ public class ConsoleUI {
 
         try {
             graph.addVertex("Norilsk"); // isolated
-            graph.addRib("Moscow", "Moscow", 10); // loop
-
-            graph.addRib("Moscow", "Saratov", 100);
-            graph.addRib("Saratov", "Samara", 20);
-            graph.addRib("Saratov", "Sochi", 25);
-            graph.addRib("Krasnodar", "Saratov", 56);
-            graph.addRib("Samara", "Krasnodar", 89);
-            graph.addRib("Samara", "Krasnoyarsk", -20);
-            graph.addRib("Krasnoyarsk", "Novosibirsk", 76);
-            consoleWrite(graph);
-            graph.serialize(new File("src/main/resources/BalanceOrient.bet"));
         } catch (Exception e) {
             e.printStackTrace();
         }
+        try {
+            graph.addRib("Moscow", "Moscow", 10); // loop
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            graph.addRib("Moscow", "Saratov", 100);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Saratov", "Samara", 20);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Saratov", "Sochi", 25);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Krasnodar", "Saratov", 56);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Samara", "Krasnodar", 89);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Samara", "Krasnoyarsk", -20);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            graph.addRib("Krasnoyarsk", "Novosibirsk", 76);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        consoleWrite(graph);
+        graph.serialize(new File("src/main/resources/BalanceOrient.bet"));
 
     }
 
@@ -225,9 +365,8 @@ public class ConsoleUI {
         try {
             graph.serialize(new File("src/main/resources/Temp.bet"));
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println(e.getStackTrace());
         }
-
     }
 
     static Graph<String> loadFromFile() {

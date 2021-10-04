@@ -1,3 +1,4 @@
+import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
 import org.jetbrains.annotations.NotNull;
 
 
@@ -7,20 +8,21 @@ import java.util.HashMap;
 public class Graph<E extends Comparable> implements Serializable {
 
     private HashMap<E, HashMap<E, Integer>> adjacencyList;
-    private  Orient oriented = Orient.notOriented;
-    private  Balance balanced = Balance.weighted;
+    private Orient oriented = Orient.notOriented;
+    private Balance balanced = Balance.weighted;
 
     Graph() {
         adjacencyList = new HashMap<E, HashMap<E, Integer>>();
         oriented = Orient.notOriented;
         balanced = Balance.weighted;
     }
-    Graph(Orient orient, Balance balance)
-    {
+
+    Graph(Orient orient, Balance balance) {
         adjacencyList = new HashMap<E, HashMap<E, Integer>>();
         oriented = orient;
         balanced = balance;
     }
+
     Graph(@NotNull File file) {
         deserialize(file);
     }
@@ -60,31 +62,43 @@ public class Graph<E extends Comparable> implements Serializable {
         if (!adjacencyList.containsKey(vertex)) {
             adjacencyList.put(vertex, new HashMap<E, Integer>());
         } else {
-                throw new Exception("This vertex already have");
+            throw new Exception("This vertex already have");
         }
     }
 
     public void addRib(E firstVertex, E secondVertex, Integer length) throws Exception {
-        if (adjacencyList.containsKey(firstVertex))
-        {
-            if (adjacencyList.get(firstVertex).containsKey(secondVertex))
-                throw new Exception("The edge already exists. It has been updated");
-        }
-        if (!adjacencyList.containsKey(firstVertex)) {
+        boolean have_first = adjacencyList.containsKey(firstVertex);
+        boolean have_second = adjacencyList.containsKey(secondVertex);
+
+        if (!have_first) {
             adjacencyList.put(firstVertex, new HashMap<E, Integer>());
         }
-        if (!adjacencyList.containsKey(secondVertex)) {
+        if (!have_second) {
             adjacencyList.put(secondVertex, new HashMap<E, Integer>());
         }
+        String exp = "";
+        if (have_first && have_second)
+            if (adjacencyList.get(firstVertex).containsKey(secondVertex))
+                exp += "The edge already exists. It has been updated | ";
         adjacencyList.get(firstVertex).put(secondVertex, length);
+
         if (!oriented.getOrient()) {
             adjacencyList.get(secondVertex).put(firstVertex, length);
         }
 
+
+
+        if (!have_first)
+            exp += "Was added first vertex " + firstVertex.toString() + " | ";
+        if (!have_second)
+            exp += "Was added second vertex " + secondVertex.toString() + "\n";
+        if (!have_first || !have_second) {
+            throw new ValueException(exp);
+        }
     }
 
     public void addRib(E firstVertex, E secondVertex) throws Exception {
-        addRib(firstVertex,secondVertex, 0);
+        addRib(firstVertex, secondVertex, 0);
 
     }
 
@@ -106,14 +120,10 @@ public class Graph<E extends Comparable> implements Serializable {
         if (adjacencyList.containsKey(firstVertex)) {
             if (adjacencyList.get(firstVertex).containsKey(secondVertex)) {
                 adjacencyList.get(firstVertex).remove(secondVertex);
+            } else {
+                throw new Exception("Edge does not exist");
             }
-            else
-            {
-                throw new Exception("Rib does not exist");
-            }
-        }
-        else
-        {
+        } else {
             throw new Exception("Vertex is not exist");
         }
         if (oriented == Orient.notOriented) {
@@ -134,7 +144,7 @@ public class Graph<E extends Comparable> implements Serializable {
 
     public void deserialize(File file) {
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file))) {
-            Graph p = (Graph)ois.readObject();
+            Graph p = (Graph) ois.readObject();
             this.adjacencyList = p.getAdjacencyList();
             this.oriented = p.getOriented();
             this.balanced = p.getBalanced();
@@ -147,19 +157,17 @@ public class Graph<E extends Comparable> implements Serializable {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
 
-        for (E firstKey : adjacencyList.keySet())
-        {
+        for (E firstKey : adjacencyList.keySet()) {
             StringBuilder stringBuilder1 = new StringBuilder();
             stringBuilder1.append(firstKey.toString() + " --- ");
 
-            for (E secondKey : adjacencyList.get(firstKey).keySet())
-            {
+            for (E secondKey : adjacencyList.get(firstKey).keySet()) {
                 stringBuilder1.append(secondKey.toString());
                 if (balanced == Balance.weighted) {
-                    stringBuilder1.append("("+adjacencyList.get(firstKey).get(secondKey).toString() + ")");
+                    stringBuilder1.append("(" + adjacencyList.get(firstKey).get(secondKey).toString() + ")");
                 }
                 stringBuilder1.append(", ");
             }
