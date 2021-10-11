@@ -7,9 +7,9 @@ import java.util.HashMap;
 
 public class Graph<E extends Comparable> implements Serializable {
 
-    private HashMap<E, HashMap<E, Integer>> adjacencyList;
-    private Orient oriented = Orient.notOriented;
-    private Balance balanced = Balance.weighted;
+    protected HashMap<E, HashMap<E, Integer>> adjacencyList;
+    protected Orient oriented = Orient.notOriented;
+    protected Balance balanced = Balance.weighted;
 
     Graph() {
         adjacencyList = new HashMap<E, HashMap<E, Integer>>();
@@ -78,6 +78,7 @@ public class Graph<E extends Comparable> implements Serializable {
         }
         String exp = "";
         if (have_first && have_second)
+
             if (adjacencyList.get(firstVertex).containsKey(secondVertex))
                 exp += "The edge already exists. It has been updated | ";
         adjacencyList.get(firstVertex).put(secondVertex, length);
@@ -91,9 +92,9 @@ public class Graph<E extends Comparable> implements Serializable {
         if (!have_first)
             exp += "Was added first vertex " + firstVertex.toString() + " | ";
         if (!have_second)
-            exp += "Was added second vertex " + secondVertex.toString() + "\n";
-        if (!have_first || !have_second) {
-            throw new ValueException(exp);
+            exp += "Was added second vertex " + secondVertex.toString();
+        if (exp!="") {
+            throw new ValueException(exp + "\n");
         }
     }
 

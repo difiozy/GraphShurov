@@ -1,9 +1,5 @@
-import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
-
+import java.io.Console;
 import java.io.File;
-import java.sql.SQLOutput;
-import java.util.HashMap;
-import java.util.Locale;
 import java.util.Scanner;
 
 public class ConsoleUI {
@@ -78,34 +74,59 @@ public class ConsoleUI {
         Scanner scanner = new Scanner(System.in);
 
 
-        Graph<String> graph;
+        Graph<String> graph = new Graph<>();
         int commandNumber;
-
+        System.out.println("Load From file?(Y/N)");
+        String command = scanner.nextLine();
         while (true) {
-            System.out.println("Load From file?(Y/N)");
-            String command = scanner.nextLine();
-
             if (command.equals("y") || command.equals("Y")) {
                 graph = loadFromFile();
                 break;
-            } else if (command.equals("n") || command.equals("N")) {
-                System.out.println("Input: 1 - weighted\n2 - Unweighted");
-                int num = scanner.nextInt();
-
-                System.out.println("Input: 1 - Oriented\n 2 - Not oriented");
-                int num2 = scanner.nextInt();
-                graph = new Graph<>((num2 == 1) ? Orient.oriented : Orient.notOriented,
-                        (num == 1) ? Balance.weighted : Balance.notWeighted);
-
+            }
+            if (command.equals("n") || command.equals("N")) {
                 break;
-            } else {
+            }
+            else {
                 System.out.println("Try one more time\n");
+                command = scanner.nextLine();
             }
         }
-        while (true) {
 
-            System.out.println("Command: 1 - Show current graph\n2 - Add Edge\n3 - Add vertex\n4 - Delete Edge\n" +
-                    "5 - Delete vertex\n6 - Save as file\n0 - End testing");
+        while(true && (command.equals("n") || command.equals("N")))
+        {
+
+
+            System.out.println("Input: 1 - weighted\n2 - Unweighted");
+            int num = scanner.nextInt();
+
+            System.out.println("Input: 1 - Oriented\n 2 - Not oriented");
+            int num2 = scanner.nextInt();
+            System.out.println("use class Graph or OrGraph?(1/2)");
+            String type = scanner.next();
+
+            if (type.equals("1")) {
+                graph = new Graph<>((num2 == 1) ? Orient.oriented : Orient.notOriented,
+                        (num == 1) ? Balance.weighted : Balance.notWeighted);
+                break;
+            }
+            if (type.equals("2"))
+            {
+                graph = new OrGraph<>((num==1)? Balance.weighted : Balance.notWeighted);
+                break;
+            }
+            System.out.println("Try one more time");
+
+        }
+        while (true) {
+            StringBuilder commandCombo =new StringBuilder("Command: 1 - Show current graph\n2 - Add Edge\n" +
+                    "3 - Add vertex\n4 - Delete Edge\n" +
+                    "5 - Delete vertex\n6 - Save as file\n");
+            if (graph.getClass() == OrGraph.class)
+            {
+                commandCombo.append("7 - get half out power\n"+
+                        "8 - get From U and From V\n");
+            }
+            commandCombo.append("0 - End testing");
             System.out.println("Input command number: ");
 
             commandNumber = scanner.nextInt();
