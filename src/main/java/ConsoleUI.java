@@ -110,7 +110,7 @@ public class ConsoleUI {
                                                        "6 - Save as file\n");
         commandCombo.append("7 - get half out power\n" +
                             "8 - get From U and From V\n");
-
+        commandCombo.append("9 - Graph with mirror edge\n");
         commandCombo.append("0 - End testing");
         while (true) {
             System.out.println(commandCombo);
@@ -143,6 +143,9 @@ public class ConsoleUI {
                 case (8):
                     getFromUAndFromV(graph);
                     break;
+                case (9):
+                    graph = orientGraphWithMirrorEdge(graph);
+                    break;
                 case (0):
                     return;
                 default:
@@ -151,6 +154,12 @@ public class ConsoleUI {
 
         }
 
+    }
+
+    private static Graph<String> orientGraphWithMirrorEdge(Graph<String> graph) {
+        Graph<String> res = graph.orientGraphWithMirrorEdge();
+        consoleWrite(res);
+        return res;
     }
 
     private static void getFromUAndFromV(Graph<String> graph) {

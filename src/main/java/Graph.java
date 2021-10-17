@@ -45,7 +45,7 @@ public class Graph<E extends Comparable<E>> implements Serializable {
         return new HashMap<>(adjacencyList);
     }
 
-    public HashMap<E, HashMap<E, Integer>> getAdjacencyList() {
+    private HashMap<E, HashMap<E, Integer>> getAdjacencyList() {
         return adjacencyList;
     }
 
@@ -178,6 +178,33 @@ public class Graph<E extends Comparable<E>> implements Serializable {
         } else {
             throw new Exception("Vertex does not exist");
         }
+    }
+    //Построить граф, полученный удалением дуг данного орграфа,
+    // не имеющих противоположно направленных парных дуг.
+    //2b
+    //№ 14
+    public Graph<E> orientGraphWithMirrorEdge()
+    {
+        Graph<E> curGraph = new Graph<>(oriented,balanced);
+        HashMap<E, HashMap<E, Integer>> curAdjList = getAdjacencyList();
+
+        for (E firstKey: curAdjList.keySet())
+        {
+            for(E secondKey: curAdjList.get(firstKey).keySet())
+            {
+                if (curAdjList.get(secondKey).containsKey(firstKey))
+                {
+                    try {
+                        curGraph.addRib(firstKey,secondKey,curAdjList.get(firstKey).get(secondKey));
+                    } catch (Exception ignored) {}
+                    try {
+                        curGraph.addRib(secondKey,firstKey,curAdjList.get(secondKey).get(firstKey));
+                    } catch (Exception ignored) {}
+                }
+            }
+        }
+        return curGraph;
+
     }
 
     @Override
