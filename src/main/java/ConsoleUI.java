@@ -85,48 +85,30 @@ public class ConsoleUI {
             }
             if (command.equals("n") || command.equals("N")) {
                 break;
-            }
-            else {
+            } else {
                 System.out.println("Try one more time\n");
                 command = scanner.nextLine();
             }
         }
 
-        while(true && (command.equals("n") || command.equals("N")))
-        {
+        System.out.println("Input: 1 - weighted\n2 - Unweighted");
+        int num = scanner.nextInt();
 
+        System.out.println("Input: 1 - Oriented\n 2 - Not oriented");
+        int num2 = scanner.nextInt();
 
-            System.out.println("Input: 1 - weighted\n2 - Unweighted");
-            int num = scanner.nextInt();
+        graph = new Graph<>((num2 == 1) ? Orient.oriented : Orient.notOriented,
+                (num == 1) ? Balance.weighted : Balance.notWeighted);
 
-            System.out.println("Input: 1 - Oriented\n 2 - Not oriented");
-            int num2 = scanner.nextInt();
-            System.out.println("use class Graph or OrGraph?(1/2)");
-            String type = scanner.next();
+        StringBuilder commandCombo = new StringBuilder("Command: 1 - Show current graph\n2 - Add Edge\n" +
+                "3 - Add vertex\n4 - Delete Edge\n" +
+                "5 - Delete vertex\n6 - Save as file\n");
+        commandCombo.append("7 - get half out power\n" +
+                "8 - get From U and From V\n");
 
-            if (type.equals("1")) {
-                graph = new Graph<>((num2 == 1) ? Orient.oriented : Orient.notOriented,
-                        (num == 1) ? Balance.weighted : Balance.notWeighted);
-                break;
-            }
-            if (type.equals("2"))
-            {
-                graph = new OrGraph<>((num==1)? Balance.weighted : Balance.notWeighted);
-                break;
-            }
-            System.out.println("Try one more time");
-
-        }
+        commandCombo.append("0 - End testing");
         while (true) {
-            StringBuilder commandCombo =new StringBuilder("Command: 1 - Show current graph\n2 - Add Edge\n" +
-                    "3 - Add vertex\n4 - Delete Edge\n" +
-                    "5 - Delete vertex\n6 - Save as file\n");
-            if (graph.getClass() == OrGraph.class)
-            {
-                commandCombo.append("7 - get half out power\n"+
-                        "8 - get From U and From V\n");
-            }
-            commandCombo.append("0 - End testing");
+            System.out.println(commandCombo);
             System.out.println("Input command number: ");
 
             commandNumber = scanner.nextInt();
@@ -150,10 +132,41 @@ public class ConsoleUI {
                 case (6):
                     saveAsFile(graph);
                     break;
+                case(7):
+                    getHalfOutPower(graph);
+                    break;
+                case(8):
+                    getFromUAndFromV(graph);
+                    break;
                 case (0):
                     return;
             }
 
+        }
+
+    }
+
+    private static void getFromUAndFromV(Graph graph) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Input first vertex name: ");
+        String vertexFirst = scanner.nextLine();
+        System.out.println("Input second vertex name");
+        String vertexSecond = scanner.nextLine();
+        try {
+            System.out.println(graph.isFromUAndFromV(vertexFirst,vertexSecond));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void getHalfOutPower(Graph graph) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Input vertex name: ");
+        String vertex = scanner.nextLine();
+        try {
+            System.out.println(graph.halfPowerOut(vertex));
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 

@@ -1,8 +1,9 @@
-import jdk.nashorn.internal.runtime.regexp.joni.exception.ValueException;
+
 import org.jetbrains.annotations.NotNull;
 
 
 import java.io.*;
+import java.lang.instrument.IllegalClassFormatException;
 import java.util.HashMap;
 
 public class Graph<E extends Comparable> implements Serializable {
@@ -94,7 +95,7 @@ public class Graph<E extends Comparable> implements Serializable {
         if (!have_second)
             exp += "Was added second vertex " + secondVertex.toString();
         if (exp!="") {
-            throw new ValueException(exp + "\n");
+            throw new IllegalArgumentException(exp + "\n");
         }
     }
 
@@ -157,6 +158,44 @@ public class Graph<E extends Comparable> implements Serializable {
         }
     }
 
+    //Вернуть полустепень исхода данной вершины орграфа.
+    //№2
+    public int halfPowerOut(E vertex) throws Exception {
+        if (!oriented.getOrient()) {
+            throw new IllegalClassFormatException("Граф не ориентированный!");
+        }
+
+        if (adjacencyList.containsKey(vertex))
+        {
+            return adjacencyList.get(vertex).size();
+        }
+        else
+        {
+            throw new IllegalArgumentException("Вершины не существует");
+        }
+    }
+
+    //Определить, существует ли вершина, в которую есть дуга как из вершины u,
+    // так и из вершины v. Вывести такую вершину.
+    //№19
+    public boolean isFromUAndFromV(E U, E V) throws Exception
+    {
+        if (adjacencyList.containsKey(U) && adjacencyList.containsKey(V))
+        {
+            for (E first : adjacencyList.get(U).keySet())
+            {
+                if (adjacencyList.get(V).containsKey(first))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        else
+        {
+            throw new IllegalArgumentException("Vertex does not exist");
+        }
+    }
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
