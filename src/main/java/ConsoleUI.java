@@ -1,15 +1,16 @@
-import java.io.Console;
+
 import java.io.File;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class ConsoleUI {
 
-    static void consoleWrite(Graph graph) {
+    static void consoleWrite(Graph<String> graph) {
         System.out.println("{\n" + graph.toString() + "}");
 
     }
 
-    static void addRib(Graph graph) {
+    static void addRib(Graph<String> graph) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Input first name vertex: ");
         String firstVertex = scanner.nextLine();
@@ -21,29 +22,29 @@ public class ConsoleUI {
             try {
                 graph.addRib(firstVertex, secondVertex, length);
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println(e.getMessage());
             }
         } else {
             try {
                 graph.addRib(firstVertex, secondVertex);
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println(e.getMessage());
             }
         }
     }
 
-    static void addVertex(Graph graph) {
+    static void addVertex(Graph<String> graph) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Input vertex name: ");
         String vertex = scanner.nextLine();
         try {
             graph.addVertex(vertex);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
     }
 
-    static void deleteRib(Graph graph) {
+    static void deleteRib(Graph<String> graph) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Input first name vertex: ");
         String firstVertex = scanner.nextLine();
@@ -53,18 +54,18 @@ public class ConsoleUI {
         try {
             graph.deleteRib(firstVertex, secondVertex);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
     }
 
-    static void deleteVertex(Graph graph) {
+    static void deleteVertex(Graph<String> graph) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Input vertex name: ");
         String vertex = scanner.nextLine();
         try {
             graph.deleteVertex(vertex);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
     }
@@ -91,20 +92,24 @@ public class ConsoleUI {
             }
         }
 
-        System.out.println("Input: 1 - weighted\n2 - Unweighted");
-        int num = scanner.nextInt();
+        if (command.equals("n") || command.equals("N")) {
+            System.out.println("Input: 1 - weighted\n2 - Unweighted");
+            int num = scanner.nextInt();
 
-        System.out.println("Input: 1 - Oriented\n 2 - Not oriented");
-        int num2 = scanner.nextInt();
+            System.out.println("Input: 1 - Oriented\n 2 - Not oriented");
+            int num2 = scanner.nextInt();
 
-        graph = new Graph<>((num2 == 1) ? Orient.oriented : Orient.notOriented,
-                (num == 1) ? Balance.weighted : Balance.notWeighted);
-
-        StringBuilder commandCombo = new StringBuilder("Command: 1 - Show current graph\n2 - Add Edge\n" +
-                "3 - Add vertex\n4 - Delete Edge\n" +
-                "5 - Delete vertex\n6 - Save as file\n");
+            graph = new Graph<>((num2 == 1) ? Orient.oriented : Orient.notOriented,
+                    (num == 1) ? Balance.weighted : Balance.notWeighted);
+        }
+        StringBuilder commandCombo = new StringBuilder("Command: 1 - Show current graph\n" +
+                                                       "2 - Add Edge\n" +
+                                                       "3 - Add vertex\n" +
+                                                       "4 - Delete Edge\n" +
+                                                       "5 - Delete vertex\n" +
+                                                       "6 - Save as file\n");
         commandCombo.append("7 - get half out power\n" +
-                "8 - get From U and From V\n");
+                            "8 - get From U and From V\n");
 
         commandCombo.append("0 - End testing");
         while (true) {
@@ -132,41 +137,43 @@ public class ConsoleUI {
                 case (6):
                     saveAsFile(graph);
                     break;
-                case(7):
+                case (7):
                     getHalfOutPower(graph);
                     break;
-                case(8):
+                case (8):
                     getFromUAndFromV(graph);
                     break;
                 case (0):
                     return;
+                default:
+                    break;
             }
 
         }
 
     }
 
-    private static void getFromUAndFromV(Graph graph) {
+    private static void getFromUAndFromV(Graph<String> graph) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Input first vertex name: ");
         String vertexFirst = scanner.nextLine();
         System.out.println("Input second vertex name");
         String vertexSecond = scanner.nextLine();
         try {
-            System.out.println(graph.isFromUAndFromV(vertexFirst,vertexSecond));
+            System.out.println(graph.isFromUAndFromV(vertexFirst, vertexSecond));
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
     }
 
-    private static void getHalfOutPower(Graph graph) {
+    private static void getHalfOutPower(Graph<String> graph) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Input vertex name: ");
         String vertex = scanner.nextLine();
         try {
             System.out.println(graph.halfPowerOut(vertex));
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(Arrays.toString(e.getStackTrace()));
         }
     }
 
@@ -177,48 +184,48 @@ public class ConsoleUI {
         try {
             graph.addVertex("Norilsk"); // isolated
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Moscow", "Moscow"); // loop
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
         try {
             graph.addRib("Moscow", "Saratov");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Saratov", "Samara");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Saratov", "Sochi");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Krasnodar", "Saratov");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Samara", "Krasnodar");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Samara", "Krasnoyarsk");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Krasnoyarsk", "Novosibirsk");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
         consoleWrite(graph);
@@ -232,48 +239,48 @@ public class ConsoleUI {
         try {
             graph.addVertex("Norilsk"); // isolated
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Moscow", "Moscow"); // loop
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
         try {
             graph.addRib("Moscow", "Saratov");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Saratov", "Samara");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Saratov", "Sochi");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Krasnodar", "Saratov");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Samara", "Krasnodar");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Samara", "Krasnoyarsk");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Krasnoyarsk", "Novosibirsk");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
 
@@ -289,48 +296,48 @@ public class ConsoleUI {
         try {
             graph.addVertex("Norilsk"); // isolated
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Moscow", "Moscow", 10); // loop
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
         try {
             graph.addRib("Moscow", "Saratov", 100);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Saratov", "Samara", 20);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Saratov", "Sochi", 25);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Krasnodar", "Saratov", 56);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Samara", "Krasnodar", 89);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Samara", "Krasnoyarsk", -20);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Krasnoyarsk", "Novosibirsk", 76);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
 
@@ -341,52 +348,51 @@ public class ConsoleUI {
 
     static void createFileOrientBalance() {
         Graph<String> graph = new Graph<>(Orient.oriented, Balance.weighted);
-
         try {
             graph.addVertex("Norilsk"); // isolated
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Moscow", "Moscow", 10); // loop
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
         try {
             graph.addRib("Moscow", "Saratov", 100);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Saratov", "Samara", 20);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Saratov", "Sochi", 25);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Krasnodar", "Saratov", 56);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Samara", "Krasnodar", 89);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Samara", "Krasnoyarsk", -20);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         try {
             graph.addRib("Krasnoyarsk", "Novosibirsk", 76);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
 
@@ -395,11 +401,11 @@ public class ConsoleUI {
 
     }
 
-    static void saveAsFile(Graph graph) {
+    static void saveAsFile(Graph<String> graph) {
         try {
             graph.serialize(new File("src/main/resources/Temp.bet"));
         } catch (Exception e) {
-            System.out.println(e.getStackTrace());
+            System.out.println(e.getMessage());
         }
     }
 
