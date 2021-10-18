@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.lang.instrument.IllegalClassFormatException;
-import java.util.HashMap;
+import java.util.*;
 
 public class Graph<E extends Comparable<E>> implements Serializable {
 
@@ -179,32 +179,142 @@ public class Graph<E extends Comparable<E>> implements Serializable {
             throw new Exception("Vertex does not exist");
         }
     }
+
     //Построить граф, полученный удалением дуг данного орграфа,
     // не имеющих противоположно направленных парных дуг.
     //2b
     //№ 14
-    public Graph<E> orientGraphWithMirrorEdge()
-    {
-        Graph<E> curGraph = new Graph<>(oriented,balanced);
+    public Graph<E> orientGraphWithMirrorEdge() {
+        Graph<E> curGraph = new Graph<>(oriented, balanced);
         HashMap<E, HashMap<E, Integer>> curAdjList = getAdjacencyList();
 
-        for (E firstKey: curAdjList.keySet())
-        {
-            for(E secondKey: curAdjList.get(firstKey).keySet())
-            {
-                if (curAdjList.get(secondKey).containsKey(firstKey))
-                {
+        for (E firstKey : curAdjList.keySet()) {
+            for (E secondKey : curAdjList.get(firstKey).keySet()) {
+                if (curAdjList.get(secondKey).containsKey(firstKey)) {
                     try {
-                        curGraph.addRib(firstKey,secondKey,curAdjList.get(firstKey).get(secondKey));
-                    } catch (Exception ignored) {}
+                        curGraph.addRib(firstKey, secondKey, curAdjList.get(firstKey).get(secondKey));
+                    } catch (Exception ignored) {
+                    }
                     try {
-                        curGraph.addRib(secondKey,firstKey,curAdjList.get(secondKey).get(firstKey));
-                    } catch (Exception ignored) {}
+                        curGraph.addRib(secondKey, firstKey, curAdjList.get(secondKey).get(firstKey));
+                    } catch (Exception ignored) {
+                    }
                 }
             }
         }
         return curGraph;
 
+    }
+
+    //Выяснить, является ли орграф сильно связным. №12 II
+    //Используем обход в глубину
+    public boolean isStrongConnect() {
+
+        for (E startVertex : adjacencyList.keySet()) {
+            Stack<E> stack = new Stack<>();
+            stack.push(startVertex);
+
+            HashMap<E, Boolean> used = new HashMap<>();
+            for (E el : adjacencyList.keySet()) used.put(el, false);
+
+            while (!stack.isEmpty()) {
+                E cur = stack.pop();
+                if (used.get(cur)) continue;
+                used.put(cur, true);
+                for (E neighbor : adjacencyList.get(cur).keySet()) {
+                    if (!used.get(neighbor)) {
+                        stack.push(neighbor);
+                    }
+                }
+
+            }
+            for (E key : used.keySet()) {
+                if (!used.get(key))
+                    return false;
+            }
+        }
+        return true;
+    }
+
+    public static void main(String[] args) {
+        Graph<String> graph = new Graph<>(Orient.oriented, Balance.notWeighted);
+
+        try {
+            graph.addRib("1", "2");
+        } catch (Exception ignored) {
+        }
+
+        try {
+            graph.addRib("2", "3");
+        } catch (Exception ignored) {
+        }
+        try {
+            graph.addRib("2", "4");
+        } catch (Exception ignored) {
+        }
+        try {
+            graph.addRib("2", "5");
+        } catch (Exception ignored) {
+        }
+
+        ConsoleUI.consoleWrite(graph);
+        System.out.println(graph.isStrongConnect());
+        System.out.println(graph.allWayLowerThenK(3));
+    }
+
+    //Вывести все вершины, длины кратчайших (по числу дуг)
+    // путей от которых до всех остальных не превосходят k. №34 II
+    // Использовать обход в ширину
+    //Complete
+    Map<E, Boolean> used = new HashMap<>();
+    public List<E> allWayLowerThenK(int k) {
+        List<E> answer = new LinkedList<>();
+        for (E startVertex : adjacencyList.keySet())
+        {
+            for (E vertex : adjacencyList.keySet())
+                used.put(vertex, false);
+            used.put(startVertex,true);
+            int res = maxDepth(startVertex);
+            boolean allVisited = true;
+            System.out.println(res);
+            for(E key:used.keySet())
+            {
+                if (!used.get(key))
+                {
+                    allVisited = false;
+                    break;
+                }
+            }
+            if (res<=k && allVisited)
+            {
+                answer.add(startVertex);
+            }
+        }
+        return answer;
+    }
+
+    private int maxDepth(E cur)
+    {
+        int curDeep = 0;
+        boolean have = false;
+        LinkedList<E> queue = new LinkedList<>();
+        queue.add(cur);
+        while(!queue.isEmpty())
+        {
+            E temp = queue.pop();
+            used.put(temp,true);
+            for (E vertex:adjacencyList.get(temp).keySet())
+            {
+                if (!used.get(vertex))
+                {
+                    have = true;
+                    queue.add(vertex);
+                }
+            }
+            if (have) curDeep++;
+            have = false;
+        }
+        return curDeep;
     }
 
     @Override

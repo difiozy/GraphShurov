@@ -111,6 +111,8 @@ public class ConsoleUI {
         commandCombo.append("7 - get half out power\n" +
                             "8 - get From U and From V\n");
         commandCombo.append("9 - Graph with mirror edge\n");
+        commandCombo.append("10 - Check is strong connect\n");
+        commandCombo.append("11 - List where all way less then k\n");
         commandCombo.append("0 - End testing");
         while (true) {
             System.out.println(commandCombo);
@@ -146,6 +148,12 @@ public class ConsoleUI {
                 case (9):
                     graph = orientGraphWithMirrorEdge(graph);
                     break;
+                case (10):
+                    checkStrongConnect(graph);
+                    break;
+                case (11):
+                    allWayLowerThenK(graph);
+                    break;
                 case (0):
                     return;
                 default:
@@ -154,6 +162,23 @@ public class ConsoleUI {
 
         }
 
+    }
+
+    private static void allWayLowerThenK(Graph<String> graph) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("input k = ");
+        int k = scanner.nextInt();
+        while(k<0)
+        {
+            System.out.println("Try one more time\n");
+            k = scanner.nextInt();
+        }
+
+        System.out.println(graph.allWayLowerThenK(k));
+    }
+
+    private static void checkStrongConnect(Graph<String> graph) {
+        System.out.println(graph.isStrongConnect());
     }
 
     private static Graph<String> orientGraphWithMirrorEdge(Graph<String> graph) {
