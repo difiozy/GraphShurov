@@ -236,77 +236,45 @@ public class Graph<E extends Comparable<E>> implements Serializable {
         return true;
     }
 
-    public static void main(String[] args) {
-        Graph<String> graph = new Graph<>(Orient.oriented, Balance.notWeighted);
-
-        try {
-            graph.addRib("1", "2");
-        } catch (Exception ignored) {
-        }
-
-        try {
-            graph.addRib("2", "3");
-        } catch (Exception ignored) {
-        }
-        try {
-            graph.addRib("2", "4");
-        } catch (Exception ignored) {
-        }
-        try {
-            graph.addRib("2", "5");
-        } catch (Exception ignored) {
-        }
-
-        ConsoleUI.consoleWrite(graph);
-        System.out.println(graph.isStrongConnect());
-        System.out.println(graph.allWayLowerThenK(3));
-    }
 
     //Вывести все вершины, длины кратчайших (по числу дуг)
     // путей от которых до всех остальных не превосходят k. №34 II
     // Использовать обход в ширину
     //Complete
     Map<E, Boolean> used = new HashMap<>();
+
     public List<E> allWayLowerThenK(int k) {
         List<E> answer = new LinkedList<>();
-        for (E startVertex : adjacencyList.keySet())
-        {
+        for (E startVertex : adjacencyList.keySet()) {
             for (E vertex : adjacencyList.keySet())
                 used.put(vertex, false);
-            used.put(startVertex,true);
+            used.put(startVertex, true);
             int res = maxDepth(startVertex);
             boolean allVisited = true;
             System.out.println(res);
-            for(E key:used.keySet())
-            {
-                if (!used.get(key))
-                {
+            for (E key : used.keySet()) {
+                if (!used.get(key)) {
                     allVisited = false;
                     break;
                 }
             }
-            if (res<=k && allVisited)
-            {
+            if (res <= k && allVisited) {
                 answer.add(startVertex);
             }
         }
         return answer;
     }
 
-    private int maxDepth(E cur)
-    {
+    private int maxDepth(E cur) {
         int curDeep = 0;
         boolean have = false;
         LinkedList<E> queue = new LinkedList<>();
         queue.add(cur);
-        while(!queue.isEmpty())
-        {
+        while (!queue.isEmpty()) {
             E temp = queue.pop();
-            used.put(temp,true);
-            for (E vertex:adjacencyList.get(temp).keySet())
-            {
-                if (!used.get(vertex))
-                {
+            used.put(temp, true);
+            for (E vertex : adjacencyList.get(temp).keySet()) {
+                if (!used.get(vertex)) {
                     have = true;
                     queue.add(vertex);
                 }
@@ -315,6 +283,89 @@ public class Graph<E extends Comparable<E>> implements Serializable {
             have = false;
         }
         return curDeep;
+    }
+    //для сравнения строк как вершин и весов между ними
+    private class StringComparator implements Comparator<String> {
+        private HashMap<E, HashMap<E, Integer>> adj;
+
+        public StringComparator(Graph graph) {
+            this.adj = graph.getCopyAdjacencyList();
+        }
+
+        public int compare(String obj1, String obj2) {
+            Integer w1;
+            Integer w2;
+
+            w1 = adj.get(obj1.split("#")[0]).get(obj1.split("#")[1]);
+            w2 = adj.get(obj2.split("#")[0]).get(obj2.split("#")[1]);
+            if (w1 == w2) {
+                return 0;
+            }
+            if (w1 == null) {
+                return -1;
+            }
+            if (w2 == null) {
+                return 1;
+            }
+            return w1.compareTo(w2);
+        }
+    }
+    //Каркас методом Краскала
+    //Exception : Если граф ориентированный
+    public List<String> kruskal() throws Exception {
+        if (oriented == Orient.oriented) {
+            throw new Exception("Graph is directed");
+        }
+        //Воозможно использование и на не взвешенном графе
+        HashSet<String> used = new HashSet<>();
+        List<String> edged = new ArrayList<>();
+        List<String> ans = new LinkedList<>();
+        for (E firstKey : adjacencyList.keySet()) {
+            for (E secondKey : adjacencyList.get(firstKey).keySet()) {
+                if (used.contains(firstKey) && used.contains(secondKey)) {
+                    continue;
+                }
+                edged.add(firstKey.toString() + "#" + secondKey.toString());
+
+            }
+        }
+
+        used.clear();
+        edged.sort(new StringComparator(this));
+        for (String edge : edged) {
+            String[] ed = edge.split("#");
+            if (!used.contains(ed[0]) || !used.contains(ed[1])) {
+                ans.add(edge);
+                used.add(ed[0]);
+                used.add(ed[1]);
+            }
+        }
+        return ans;
+    }
+
+    public static void main(String[] args) {
+        Graph<String> graph = new Graph<>(Orient.notOriented, Balance.weighted);
+
+        try {
+            graph.addRib("1", "2", 10);
+        } catch (Exception ignored) {
+        }
+
+        try {
+            graph.addRib("1", "4", 5);
+        } catch (Exception ignored) {
+        }
+        try {
+            graph.addRib("2", "4", 7);
+        } catch (Exception ignored) {
+        }
+
+        ConsoleUI.consoleWrite(graph);
+        try {
+            System.out.println(graph.kruskal());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

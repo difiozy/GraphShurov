@@ -113,6 +113,7 @@ public class ConsoleUI {
         commandCombo.append("9 - Graph with mirror edge\n");
         commandCombo.append("10 - Check is strong connect\n");
         commandCombo.append("11 - List where all way less then k\n");
+        commandCombo.append("12 - Kruskal\n");
         commandCombo.append("0 - End testing");
         while (true) {
             System.out.println(commandCombo);
@@ -154,6 +155,9 @@ public class ConsoleUI {
                 case (11):
                     allWayLowerThenK(graph);
                     break;
+                case(12):
+                    Kruskal(graph);
+                    break;
                 case (0):
                     return;
                 default:
@@ -162,6 +166,14 @@ public class ConsoleUI {
 
         }
 
+    }
+
+    private static void Kruskal(Graph<String> graph) {
+        try {
+            System.out.println(graph.kruskal());
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private static void allWayLowerThenK(Graph<String> graph) {
