@@ -1,9 +1,10 @@
 
+import com.sun.source.tree.ReturnTree;
 import org.jetbrains.annotations.NotNull;
 
 
 import java.io.*;
-import java.lang.instrument.IllegalClassFormatException;
+import java.lang.reflect.MalformedParameterizedTypeException;
 import java.util.*;
 
 public class Graph<E extends Comparable<E>> implements Serializable {
@@ -42,7 +43,12 @@ public class Graph<E extends Comparable<E>> implements Serializable {
     }
 
     public HashMap<E, HashMap<E, Integer>> getCopyAdjacencyList() {
-        return new HashMap<>(adjacencyList);
+        HashMap<E, HashMap<E, Integer>> adjList = new HashMap<>(adjacencyList);
+        for (E firstKey : adjList.keySet()) {
+            HashMap<E, Integer> temp = new HashMap<>(adjList.get(firstKey));
+            adjList.put(firstKey, temp);
+        }
+        return adjList;
     }
 
     private HashMap<E, HashMap<E, Integer>> getAdjacencyList() {
@@ -153,9 +159,7 @@ public class Graph<E extends Comparable<E>> implements Serializable {
     //Вернуть полустепень исхода данной вершины орграфа.
     //№2
     public int halfPowerOut(E vertex) throws Exception {
-        if (!oriented.getOrient()) {
-            throw new IllegalClassFormatException("Граф не ориентированный!");
-        }
+
 
         if (adjacencyList.containsKey(vertex)) {
             return adjacencyList.get(vertex).size();
@@ -171,6 +175,7 @@ public class Graph<E extends Comparable<E>> implements Serializable {
         if (adjacencyList.containsKey(U) && adjacencyList.containsKey(V)) {
             for (E first : adjacencyList.get(U).keySet()) {
                 if (adjacencyList.get(V).containsKey(first)) {
+                    System.out.println(first);
                     return true;
                 }
             }
@@ -189,6 +194,10 @@ public class Graph<E extends Comparable<E>> implements Serializable {
         HashMap<E, HashMap<E, Integer>> curAdjList = getAdjacencyList();
 
         for (E firstKey : curAdjList.keySet()) {
+            try {
+                curGraph.addVertex(firstKey);
+            } catch (Exception e) {
+            }
             for (E secondKey : curAdjList.get(firstKey).keySet()) {
                 if (curAdjList.get(secondKey).containsKey(firstKey)) {
                     try {
@@ -251,7 +260,7 @@ public class Graph<E extends Comparable<E>> implements Serializable {
             used.put(startVertex, true);
             int res = maxDepth(startVertex);
             boolean allVisited = true;
-            System.out.println(res);
+            //System.out.println(res);
             for (E key : used.keySet()) {
                 if (!used.get(key)) {
                     allVisited = false;
@@ -284,6 +293,7 @@ public class Graph<E extends Comparable<E>> implements Serializable {
         }
         return curDeep;
     }
+
     //для сравнения строк как вершин и весов между ними
     private class StringComparator implements Comparator<String> {
         private HashMap<E, HashMap<E, Integer>> adj;
@@ -310,6 +320,7 @@ public class Graph<E extends Comparable<E>> implements Serializable {
             return w1.compareTo(w2);
         }
     }
+
     //Каркас методом Краскала
     //Exception : Если граф ориентированный
     public List<String> kruskal() throws Exception {
@@ -343,30 +354,192 @@ public class Graph<E extends Comparable<E>> implements Serializable {
         return ans;
     }
 
-    public static void main(String[] args) {
-        Graph<String> graph = new Graph<>(Orient.notOriented, Balance.weighted);
+    public Map<E, Integer> dijkstra(E u) {
+        System.out.println(adjacencyList.get(u));
+        Set<E> used = new HashSet<>();
+        Map<E, Integer> distant = new HashMap();
 
-        try {
-            graph.addRib("1", "2", 10);
-        } catch (Exception ignored) {
+        for (E key : this.adjacencyList.keySet()) {
+            if (key.equals(u)) {
+                distant.put(u, 0);
+            } else {
+                distant.put(key, Integer.MAX_VALUE);
+            }
         }
 
-        try {
-            graph.addRib("1", "4", 5);
-        } catch (Exception ignored) {
-        }
-        try {
-            graph.addRib("2", "4", 7);
-        } catch (Exception ignored) {
+        while (used.size() != this.adjacencyList.size()) {
+            E curVertex = null;
+            Integer min_val = Integer.MAX_VALUE;
+            for (E key : distant.keySet()) {
+                if (used.contains(key))
+                    continue;
+
+                if (min_val > distant.get(key)) {
+                    curVertex = key;
+                    min_val = distant.get(key);
+                }
+            }
+
+            if (curVertex == null)
+                break;
+            used.add(curVertex);
+            for (E key : this.adjacencyList.get(curVertex).keySet()) {
+                Integer res = distant.get(curVertex) + this.adjacencyList.get(curVertex).get(key);
+                if (distant.get(key) > res) {
+                    distant.put(key, res);
+                }
+            }
         }
 
-        ConsoleUI.consoleWrite(graph);
+
+        return distant;
+    }
+
+    /*
+    Task IV a. Num 1.
+    Определить, существует ли путь длиной не более L между двумя заданными вершинами графа.
+    Решено с использованием алгоритма Дейкстры
+     */
+    public boolean isMinWayUAndWLessThenL(E u, E w, Integer L) {
+        Map<E, Integer> allMinWayFromU = dijkstra(u);
+
+        System.out.println(this);
+        System.out.println(allMinWayFromU);
+        return allMinWayFromU.get(w) < L;
+    }
+
+
+    private Map<E, Integer> bellmanFord(E u) throws Exception {
+        Map<E, Integer> dist = new HashMap<>();
+        for (E key : adjacencyList.keySet()) {
+            dist.put(key, Integer.MAX_VALUE);
+        }
+        dist.put(u, 0);
+
+        for (int i = 0; i < adjacencyList.size(); i++) {
+            for (E firstKey : adjacencyList.keySet()) {
+                for (E secondKey : adjacencyList.get(firstKey).keySet()) {
+                    if (dist.get(firstKey) != Integer.MAX_VALUE & dist.get(firstKey)
+                                                                  + adjacencyList.get(firstKey).get(secondKey)
+                                                                  < dist.get(secondKey)) {
+                        dist.put(secondKey, dist.get(firstKey) + adjacencyList.get(firstKey).get(secondKey));
+                    }
+                }
+            }
+        }
+
+        for (E firstKey : adjacencyList.keySet()) {
+            for (E secondKey : adjacencyList.get(firstKey).keySet()) {
+                if (dist.get(firstKey) != Integer.MAX_VALUE & dist.get(firstKey)
+                                                              + adjacencyList.get(firstKey).get(secondKey)
+                                                              < dist.get(secondKey)) {
+                    throw new Exception("Graph contains negative weight cycle");
+                }
+            }
+        }
+
+        return dist;
+    }
+
+    /*
+    Task IV b. Num 14
+    Вывести все кратчайшие пути из вершины u.
+     */
+    public Map<E, Integer> allShortestPathsFromU(E u) {
+        Map<E, Integer> ans = new HashMap<>();
         try {
-            System.out.println(graph.kruskal());
-        } catch (Exception e) {
-            e.printStackTrace();
+            ans = bellmanFord(u);
+            for (E key : ans.keySet()) {
+                if (ans.get(key) == Integer.MAX_VALUE)
+                    ans.put(key, -1);
+            }
+        } catch (Exception ignored) {
+        } finally {
+            return ans;
         }
     }
+
+    /*
+    Task IV c. Num 17
+    Вывести кратчайшие пути для всех пар вершин.
+    В графе могут быть циклы отрицательного веса.
+    Флойда
+     */
+    private HashMap<E, HashMap<E, Integer>> floyd()
+    {
+        HashMap<E, HashMap<E, Integer>> ans = getCopyAdjacencyList();
+
+        for (E firstKey: ans.keySet())
+        {
+            for (E secondKey : ans.keySet())
+            {
+                ans.get(firstKey).putIfAbsent(secondKey, Integer.MAX_VALUE / 2);
+                ans.get(secondKey).putIfAbsent(firstKey, Integer.MAX_VALUE / 2);
+            }
+        }
+        for (E key : ans.keySet()) {
+            ans.get(key).put(key, 0);
+        }
+
+        for (E k : ans.keySet()) {
+            for (E i : ans.keySet()) {
+                for (E j : ans.keySet()) {
+                    Integer el = Math.min(ans.get(i).get(j), ans.get(i).get(k) + ans.get(k).get(j));
+                    ans.get(i).put(j, el);
+                }
+            }
+        }
+
+
+        return ans;
+    }
+    public HashMap<E, HashMap<E, Integer>> allShortestPath() {
+
+        HashMap<E, HashMap<E,Integer>> ans = new HashMap<>();
+        try {
+            ans = floyd();
+        }
+        catch (Exception e)
+        {
+            return ans;
+        }
+
+        for (E key : ans.keySet())
+        {
+            for (E secKey : ans.get(key).keySet())
+            {
+                if (ans.get(key).get(secKey) == Integer.MAX_VALUE/2)
+                {
+                    ans.get(key).put(secKey, null);
+                }
+            }
+        }
+        return  ans;
+    }
+
+    public static void main(String[] strings) {
+        Graph<String> graph = new Graph<>(Orient.oriented, Balance.weighted);
+        try {
+            graph.addRib("1", "2", 20);
+        } catch (Exception e) {
+
+        }
+        try {
+            graph.addRib("1", "3", 5);
+        } catch (Exception e) {
+
+        }
+        try {
+            graph.addRib("3", "2", 10);
+        } catch (Exception e) {
+
+        }
+
+
+        System.out.println(graph.allShortestPath());
+
+    }
+
 
     @Override
     public String toString() {

@@ -1,7 +1,13 @@
 
+import com.google.gson.stream.JsonToken;
+
+import javax.crypto.spec.PSource;
 import java.io.File;
+import java.sql.SQLOutput;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Scanner;
+import java.util.SplittableRandom;
 
 public class ConsoleUI {
 
@@ -13,9 +19,9 @@ public class ConsoleUI {
     static void addRib(Graph<String> graph) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Input first name vertex: ");
-        String firstVertex = scanner.nextLine();
+        String firstVertex = scanner.nextLine().strip();
         System.out.println("Input second name vertex: ");
-        String secondVertex = scanner.nextLine();
+        String secondVertex = scanner.nextLine().strip();
         if (graph.getBalanced().getBalance()) {
             System.out.println("Input weight or length: ");
             Integer length = scanner.nextInt();
@@ -114,6 +120,9 @@ public class ConsoleUI {
         commandCombo.append("10 - Check is strong connect\n");
         commandCombo.append("11 - List where all way less then k\n");
         commandCombo.append("12 - Kruskal\n");
+        commandCombo.append("13 - isMinWayUAndWLessThenL\n");
+        commandCombo.append("14 - allShortestPathsFromU \n");
+        commandCombo.append("15 - allShortestPath\n");
         commandCombo.append("0 - End testing");
         while (true) {
             System.out.println(commandCombo);
@@ -147,7 +156,7 @@ public class ConsoleUI {
                     getFromUAndFromV(graph);
                     break;
                 case (9):
-                    graph = orientGraphWithMirrorEdge(graph);
+                    orientGraphWithMirrorEdge(graph);
                     break;
                 case (10):
                     checkStrongConnect(graph);
@@ -158,12 +167,67 @@ public class ConsoleUI {
                 case(12):
                     Kruskal(graph);
                     break;
+                case (13):
+                    isMinWayUAndWLessThenL(graph);
+                    break;
+                case(14):
+                    allShortestPathsFromU(graph);
+                    break;
+                case (15):
+                    allShortestPaths(graph);
+                    break;
                 case (0):
                     return;
                 default:
                     break;
             }
 
+        }
+
+    }
+
+    private static void allShortestPaths(Graph<String> graph) {
+        HashMap<String, HashMap<String, Integer>> ans = graph.allShortestPath();
+        for (String firstKey : ans.keySet())
+        {
+            System.out.print(firstKey + '=');
+            System.out.println(ans.get(firstKey));
+            for (String secondKey : ans.get(firstKey).keySet())
+            {
+
+            }
+        }
+    }
+
+    private static void allShortestPathsFromU(Graph<String> graph) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Введите вершину из которой нужно найти минимальные пути до всех остальных");
+        String u = scanner.nextLine();
+        System.out.println(graph.allShortestPathsFromU(u));
+    }
+
+
+    private static void isMinWayUAndWLessThenL(Graph<String> graph) {
+
+
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Введите первую вершину: ");
+        String firstVertex = scanner.nextLine();
+
+        System.out.println("Введите вторую вершину: ");
+        String secondVertex = scanner.nextLine();
+
+        System.out.println("Введите длину L: ");
+        Integer L = scanner.nextInt();
+
+
+        try{
+            System.out.println(graph.isMinWayUAndWLessThenL(firstVertex, secondVertex, L));
+        }
+        catch (Exception e)
+        {
+            System.out.println("Введены неверные вершины");
         }
 
     }
@@ -219,7 +283,7 @@ public class ConsoleUI {
         try {
             System.out.println(graph.halfPowerOut(vertex));
         } catch (Exception e) {
-            System.out.println(Arrays.toString(e.getStackTrace()));
+            System.out.println(e.getMessage());
         }
     }
 
@@ -460,10 +524,7 @@ public class ConsoleUI {
     }
 
     public static void main(String[] args) {
-        createFileNotOrientNotBalance();
-        createFileOrientNotBalance();
-        createFileNotOrientBalance();
-        createFileOrientBalance();
+
 
         startTesting();
 
