@@ -166,15 +166,12 @@ public class ConsoleUI {
                     Kruskal(graph);
                     break;
                 case (13):
-                    //TODO: Написать тестовый graph
                     isMinWayUAndWLessThenL(graph);
                     break;
                 case (14):
-                    //TODO: Написать тестовый graph
                     allShortestPathsFromU(graph);
                     break;
                 case (15):
-                    //TODO: Написать тестовый graph
                     allShortestPaths(graph);
                     break;
                 case (0):
