@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.*;
 import java.lang.reflect.MalformedParameterizedTypeException;
 import java.util.*;
+import java.util.logging.Level;
 
 public class Graph<E extends Comparable<E>> implements Serializable {
 
@@ -260,7 +261,6 @@ public class Graph<E extends Comparable<E>> implements Serializable {
             used.put(startVertex, true);
             int res = maxDepth(startVertex);
             boolean allVisited = true;
-            //System.out.println(res);
             for (E key : used.keySet()) {
                 if (!used.get(key)) {
                     allVisited = false;
@@ -270,26 +270,33 @@ public class Graph<E extends Comparable<E>> implements Serializable {
             if (res <= k && allVisited) {
                 answer.add(startVertex);
             }
+            used.clear();
         }
         return answer;
     }
 
     private int maxDepth(E cur) {
         int curDeep = 0;
-        boolean have = false;
         LinkedList<E> queue = new LinkedList<>();
         queue.add(cur);
+        HashMap<E, Integer> alwaysHave = new HashMap<>();
+        alwaysHave.put(cur, 0);
         while (!queue.isEmpty()) {
             E temp = queue.pop();
             used.put(temp, true);
             for (E vertex : adjacencyList.get(temp).keySet()) {
                 if (!used.get(vertex)) {
-                    have = true;
                     queue.add(vertex);
+                    if (alwaysHave.get(vertex) == null) alwaysHave.put(vertex, Integer.MAX_VALUE);
+                    alwaysHave.put(vertex, Math.min(alwaysHave.get(temp) + 1, alwaysHave.get(vertex)));
                 }
             }
-            if (have) curDeep++;
-            have = false;
+
+        }
+        //System.out.println(cur);
+        //System.out.println(alwaysHave);
+        for (Integer el : alwaysHave.values()) {
+            curDeep = Math.max(curDeep, el);
         }
         return curDeep;
     }
@@ -333,15 +340,13 @@ public class Graph<E extends Comparable<E>> implements Serializable {
         List<String> ans = new LinkedList<>();
         for (E firstKey : adjacencyList.keySet()) {
             for (E secondKey : adjacencyList.get(firstKey).keySet()) {
-                if (used.contains(firstKey) && used.contains(secondKey)) {
-                    continue;
-                }
                 edged.add(firstKey.toString() + "#" + secondKey.toString());
 
             }
         }
-
-        used.clear();
+        if (isCountComponentMoreThen1()) {
+            throw new Exception("Больше 2х компонент связности");
+        }
         edged.sort(new StringComparator(this));
         for (String edge : edged) {
             String[] ed = edge.split("#");
@@ -354,10 +359,50 @@ public class Graph<E extends Comparable<E>> implements Serializable {
         return ans;
     }
 
+    private boolean isCountComponentMoreThen1() {
+        for (E firstKey : adjacencyList.keySet()) {
+            Stack<E> stack = new Stack<>();
+            stack.push(firstKey);
+
+            HashMap<E, Boolean> used = new HashMap<>();
+            for (E el : adjacencyList.keySet()) used.put(el, false);
+
+            while (!stack.isEmpty()) {
+                E cur = stack.pop();
+                if (used.get(cur)) continue;
+                used.put(cur, true);
+                for (E neighbor : adjacencyList.get(cur).keySet()) {
+                    if (!used.get(neighbor)) {
+                        stack.push(neighbor);
+                    }
+                }
+
+            }
+            for (E key : used.keySet()) {
+                if (!used.get(key))
+                    return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
+
+    /*
+    Task IV a. Num 1.
+    Определить, существует ли путь длиной не более L между двумя заданными вершинами графа.
+    Решено с использованием алгоритма Дейкстры
+     */
+    public boolean isMinWayUAndWLessThenL(E u, E w, Integer L) {
+        Map<E, Integer> allMinWayFromU = dijkstra(u);
+
+        System.out.println(allMinWayFromU);
+        return allMinWayFromU.get(w) < L;
+    }
+
     public Map<E, Integer> dijkstra(E u) {
-        System.out.println(adjacencyList.get(u));
         Set<E> used = new HashSet<>();
-        Map<E, Integer> distant = new HashMap();
+        Map<E, Integer> distant = new HashMap<>();
 
         for (E key : this.adjacencyList.keySet()) {
             if (key.equals(u)) {
@@ -396,26 +441,28 @@ public class Graph<E extends Comparable<E>> implements Serializable {
     }
 
     /*
-    Task IV a. Num 1.
-    Определить, существует ли путь длиной не более L между двумя заданными вершинами графа.
-    Решено с использованием алгоритма Дейкстры
+    Task IV b. Num 14
+    Вывести все кратчайшие пути из вершины u.
      */
-    public boolean isMinWayUAndWLessThenL(E u, E w, Integer L) {
-        Map<E, Integer> allMinWayFromU = dijkstra(u);
-
-        System.out.println(this);
-        System.out.println(allMinWayFromU);
-        return allMinWayFromU.get(w) < L;
+    public Map<E, List<E>> allShortestPathsFromU(E u) {
+        Map<E, List<E>> ans = new HashMap<>();
+        try {
+            ans = bellmanFord(u);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            return ans;
+        }
     }
 
-
-    private Map<E, Integer> bellmanFord(E u) throws Exception {
+    private Map<E, List<E>> bellmanFord(E u) throws Exception {
         Map<E, Integer> dist = new HashMap<>();
+        Map<E, List<E>> P = new HashMap<>();
         for (E key : adjacencyList.keySet()) {
             dist.put(key, Integer.MAX_VALUE);
         }
         dist.put(u, 0);
-
+        P.put(u, new LinkedList<>());
         for (int i = 0; i < adjacencyList.size(); i++) {
             for (E firstKey : adjacencyList.keySet()) {
                 for (E secondKey : adjacencyList.get(firstKey).keySet()) {
@@ -423,6 +470,10 @@ public class Graph<E extends Comparable<E>> implements Serializable {
                                                                   + adjacencyList.get(firstKey).get(secondKey)
                                                                   < dist.get(secondKey)) {
                         dist.put(secondKey, dist.get(firstKey) + adjacencyList.get(firstKey).get(secondKey));
+                        List<E> curList = new LinkedList<>(P.get(firstKey));
+                        curList.add(firstKey);
+
+                        P.put(secondKey, curList);
                     }
                 }
             }
@@ -438,25 +489,8 @@ public class Graph<E extends Comparable<E>> implements Serializable {
             }
         }
 
-        return dist;
-    }
-
-    /*
-    Task IV b. Num 14
-    Вывести все кратчайшие пути из вершины u.
-     */
-    public Map<E, Integer> allShortestPathsFromU(E u) {
-        Map<E, Integer> ans = new HashMap<>();
-        try {
-            ans = bellmanFord(u);
-            for (E key : ans.keySet()) {
-                if (ans.get(key) == Integer.MAX_VALUE)
-                    ans.put(key, -1);
-            }
-        } catch (Exception ignored) {
-        } finally {
-            return ans;
-        }
+        System.out.println(dist);
+        return P;
     }
 
     /*
@@ -465,17 +499,43 @@ public class Graph<E extends Comparable<E>> implements Serializable {
     В графе могут быть циклы отрицательного веса.
     Флойда
      */
-    private HashMap<E, HashMap<E, Integer>> floyd()
-    {
-        HashMap<E, HashMap<E, Integer>> ans = getCopyAdjacencyList();
+    public HashMap<E, HashMap<E, List<E>>>  allShortestPath() {
 
-        for (E firstKey: ans.keySet())
-        {
-            for (E secondKey : ans.keySet())
-            {
+        HashMap<E, HashMap<E, List<E>>>  ans = new HashMap<>();
+        try {
+            ans = floyd();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ans;
+        }
+
+       /* for (E key : ans.keySet()) {
+            for (E secKey : ans.get(key).keySet()) {
+                if (ans.get(key).get(secKey) == Integer.MAX_VALUE / 2) {
+                    ans.get(key).put(secKey, null);
+                }
+            }
+        }*/
+        return ans;
+    }
+
+    private HashMap<E, HashMap<E, List<E>>>  floyd() {
+        HashMap<E, HashMap<E, Integer>> ans = getCopyAdjacencyList();
+        HashMap<E, HashMap<E, List<E>>> P = new HashMap<>();
+        for (E firstKey : ans.keySet()) {
+            for (E secondKey : ans.keySet()) {
                 ans.get(firstKey).putIfAbsent(secondKey, Integer.MAX_VALUE / 2);
                 ans.get(secondKey).putIfAbsent(firstKey, Integer.MAX_VALUE / 2);
+                }
+        }
+        for (E firstKey : ans.keySet())
+        {
+            HashMap<E, List<E>> curMap = new HashMap<>();
+            for (E secondKey: ans.keySet())
+            {
+                curMap.put(secondKey, new LinkedList<>());
             }
+            P.put(firstKey, curMap);
         }
         for (E key : ans.keySet()) {
             ans.get(key).put(key, 0);
@@ -484,38 +544,29 @@ public class Graph<E extends Comparable<E>> implements Serializable {
         for (E k : ans.keySet()) {
             for (E i : ans.keySet()) {
                 for (E j : ans.keySet()) {
-                    Integer el = Math.min(ans.get(i).get(j), ans.get(i).get(k) + ans.get(k).get(j));
-                    ans.get(i).put(j, el);
+
+                    if (ans.get(i).get(j) > ans.get(i).get(k) + ans.get(k).get(j)) {
+                        Integer el = ans.get(i).get(k) + ans.get(k).get(j);
+                        ans.get(i).put(j, el);
+
+                        List<E> curList = new LinkedList<>();
+                        curList.addAll(P.get(i).get(k));
+                        curList.add(k);
+                        curList.addAll(P.get(k).get(j));
+                        P.get(i).put(j, curList);
+                    }
+
+
                 }
             }
         }
-
-
-        return ans;
-    }
-    public HashMap<E, HashMap<E, Integer>> allShortestPath() {
-
-        HashMap<E, HashMap<E,Integer>> ans = new HashMap<>();
-        try {
-            ans = floyd();
-        }
-        catch (Exception e)
+        for (E e : ans.keySet())
         {
-            return ans;
+            System.out.println(e + " " + ans.get(e));
         }
-
-        for (E key : ans.keySet())
-        {
-            for (E secKey : ans.get(key).keySet())
-            {
-                if (ans.get(key).get(secKey) == Integer.MAX_VALUE/2)
-                {
-                    ans.get(key).put(secKey, null);
-                }
-            }
-        }
-        return  ans;
+        return P;
     }
+
 
     public static void main(String[] strings) {
         Graph<String> graph = new Graph<>(Orient.oriented, Balance.weighted);

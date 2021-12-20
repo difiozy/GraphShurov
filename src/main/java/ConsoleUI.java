@@ -4,10 +4,8 @@ import com.google.gson.stream.JsonToken;
 import javax.crypto.spec.PSource;
 import java.io.File;
 import java.sql.SQLOutput;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Scanner;
-import java.util.SplittableRandom;
+import java.util.*;
+import java.util.concurrent.Phaser;
 
 public class ConsoleUI {
 
@@ -164,16 +162,19 @@ public class ConsoleUI {
                 case (11):
                     allWayLowerThenK(graph);
                     break;
-                case(12):
+                case (12):
                     Kruskal(graph);
                     break;
                 case (13):
+                    //TODO: Написать тестовый graph
                     isMinWayUAndWLessThenL(graph);
                     break;
-                case(14):
+                case (14):
+                    //TODO: Написать тестовый graph
                     allShortestPathsFromU(graph);
                     break;
                 case (15):
+                    //TODO: Написать тестовый graph
                     allShortestPaths(graph);
                     break;
                 case (0):
@@ -187,16 +188,8 @@ public class ConsoleUI {
     }
 
     private static void allShortestPaths(Graph<String> graph) {
-        HashMap<String, HashMap<String, Integer>> ans = graph.allShortestPath();
-        for (String firstKey : ans.keySet())
-        {
-            System.out.print(firstKey + '=');
-            System.out.println(ans.get(firstKey));
-            for (String secondKey : ans.get(firstKey).keySet())
-            {
-
-            }
-        }
+        HashMap<String, HashMap<String, List<String>>> ans = graph.allShortestPath();
+        System.out.println(ans);
     }
 
     private static void allShortestPathsFromU(Graph<String> graph) {
@@ -222,11 +215,9 @@ public class ConsoleUI {
         Integer L = scanner.nextInt();
 
 
-        try{
+        try {
             System.out.println(graph.isMinWayUAndWLessThenL(firstVertex, secondVertex, L));
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.out.println("Введены неверные вершины");
         }
 
@@ -244,8 +235,7 @@ public class ConsoleUI {
         Scanner scanner = new Scanner(System.in);
         System.out.print("input k = ");
         int k = scanner.nextInt();
-        while(k<0)
-        {
+        while (k < 0) {
             System.out.println("Try one more time\n");
             k = scanner.nextInt();
         }
@@ -524,10 +514,190 @@ public class ConsoleUI {
     }
 
     public static void main(String[] args) {
+        //startTesting();
+        testAllWayLessThenK();
+        testKruskal();
+        testIsMinWayUAndWLessThenL();
+        testAllShortestPathsFromU();
+        testAllShortestPath();
+    }
+
+    private static void testAllShortestPath() {
+        Graph<String> graph = new Graph<>(Orient.oriented, Balance.weighted);
+        try {
+            graph.addRib("1", "2", 10);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib("2", "4", 1);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib("4", "1", 5);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib("4", "2", 10);
+        } catch (Exception e) {
+        }
+        System.out.println("\nВывести кратчайшие пути для всех пар вершин.\n" +
+                           "В графе могут быть циклы отрицательного веса.\n" +
+                           "Флойда");
+        System.out.println(graph);
+        HashMap<String,HashMap<String,List<String >>> res = graph.allShortestPath();
+        for (String firstKey : res.keySet()) {
+            HashMap<String,List<String>> curMap = res.get(firstKey);
+            for(String secondKey : curMap.keySet())
+            {
+                System.out.println(firstKey + "->" + secondKey + "{" + curMap.get(secondKey) + "}");
+            }
+
+        }
+    }
+
+    private static void testAllShortestPathsFromU() {
+        Graph<String> graph = new Graph<>(Orient.oriented, Balance.weighted);
+        try {
+            graph.addRib("1", "2", 10);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib("2", "3", 15);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib("2", "4", 1);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib("4", "1", 5);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib("4", "2", 10);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib("4", "3", 1);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addVertex("5");
+        } catch (Exception e) {
+        }
+        System.out.println("\nВсе кратчайшие вершины из U");
+        System.out.println(graph);
+        System.out.println(graph.allShortestPathsFromU("1"));
+    }
+
+    private static void testIsMinWayUAndWLessThenL() {
+        Graph<String> graph = new Graph<>(Orient.oriented, Balance.weighted);
+        try {
+            graph.addRib("1", "2", 10);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib("2", "3", 15);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib("2", "4", 1);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib("4", "1", 5);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib("4", "2", 10);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib("4", "3", 1);
+        } catch (Exception e) {
+        }
 
 
-        startTesting();
+        System.out.println("\nОпределить, существует ли путь длиной не более L между двумя заданными вершинами графа.\n" +
+                           "Решено с использованием алгоритма Дейкстры");
+        System.out.println(graph);
 
+        System.out.println(graph.isMinWayUAndWLessThenL("1", "3", 13));
+    }
+
+    private static void testKruskal() {
+        Graph<String> graph = new Graph<>(Orient.notOriented, Balance.weighted);
+        try {
+            graph.addRib("1", "2", 10);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib("2", "3", 15);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib("2", "4", 1);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib("4", "1", 5);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib("4", "2", 10);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib("4", "3", 1);
+        } catch (Exception e) {
+        }
+
+
+        System.out.println("\nМетод Краскала");
+        System.out.println(graph);
+
+
+        try {
+            List<String> res = graph.kruskal();
+            System.out.println(res);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+    }
+
+    private static void testAllWayLessThenK() {
+        Graph<Integer> graph = new Graph<>(Orient.oriented, Balance.notWeighted);
+
+        try {
+            graph.addRib(1, 2);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib(2, 3);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib(2, 4);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib(4, 1);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib(4, 2);
+        } catch (Exception e) {
+        }
+        try {
+            graph.addRib(4, 3);
+        } catch (Exception e) {
+        }
+
+        System.out.println(graph);
+
+        int k = 1;
+        System.out.println("k=" + k + " \n" + graph.allWayLowerThenK(k));
 
     }
 }
